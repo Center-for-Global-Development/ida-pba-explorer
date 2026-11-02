@@ -11,9 +11,9 @@ An interactive tool for exploring the World Bank IDA performance-based allocatio
 - the exponent on GNI per capita (−1 to −0.125; FY25: −0.125)
 - the exponent on CPR (1 to 4; FY25: 3)
 - the base allocation per country (SDR 0–50m; FY25: SDR 15m)
-- an optional GNI per capita cutoff, above which a country receives nothing (no PBA, base or FCV)
+- an optional GNI per capita cutoff, above which a country receives nothing (no PBA, base or FCV). The slider moves in $250 steps, with an extra stop at IDA's $1,365 income threshold.
 
-Two scenario buttons set all four controls at once: the FY25 formula, and the FY25 formula with the GNI per capita exponent doubled (−0.125 to −0.25).
+Three scenario buttons sit under the controls. "FY25 formula" resets every control. "Double the GNI per capita exponent" (−0.125 to −0.25) and "Apply the IDA income threshold ($1,365)" are toggles that change only their own control, so they can be combined. They show as pressed whenever their setting is active, including when it is reached with the sliders.
 
 It shows which countries gain and lose compared with the FY25 formula, plotted against GNI per capita, CPR or poverty. It also shows how the correlation between allocation per person and the poverty rate changes, for four measures: the formula only, + FCV, + base, and + FCV + base.
 

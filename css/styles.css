@@ -137,6 +137,8 @@ select {
   cursor: pointer;
 }
 .btn:hover { background: var(--cgd-teal); color: #fff; }
+.btn[aria-pressed="true"] { background: var(--cgd-teal); color: #fff; }
+.btn[aria-pressed="true"]::before { content: '\2713\00a0'; }
 .btn:disabled { opacity: 0.5; cursor: default; }
 .btn:disabled:hover { background: #fff; color: var(--cgd-teal); }
 

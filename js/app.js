@@ -8,7 +8,7 @@
 
   const COLORS = {
     teal: '#0B4C5B', lightTeal: '#006970', gold: '#FFB52C', tealGray: '#85A5AD',
-    tealBlack: '#1A272A', lightGray: '#DFE0E2', blue: '#2D99B5'
+    tealBlack: '#1A272A', lightGray: '#DFE0E2', blue: '#2D99B5', darkGray: '#394649'
   };
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -34,6 +34,14 @@
     povLine: null, xAxis: 'gnipc', metric: 'pct',
     sort: { key: 'pct', dir: 'desc' }
   };
+  // GNI per capita cutoff slider: $250 steps from $1,000 to $12,000, plus a stop at
+  // IDA's $1,365 income threshold. The slider value is an index into this list.
+  const IDA_THRESHOLD = 1365;
+  const CUTOFF_STOPS = [];
+  for (let v = 1000; v <= 12000; v += 250) CUTOFF_STOPS.push(v);
+  CUTOFF_STOPS.push(IDA_THRESHOLD);
+  CUTOFF_STOPS.sort((a, b) => a - b);
+
   // GNI per capita multiplier slider: factor = 10^(v/500), so v = 0 is exactly x1,
   // v = 500 is x10 and v = -301 is x0.25
   const GNI_MIN = 0.25, GNI_MAX = 10;
@@ -135,15 +143,17 @@
   function debounced(fn) { clearTimeout(timer); timer = setTimeout(fn, 60); }
 
   function setupFormulaControls() {
-    const bind = (id, key, label) => {
+    const bind = (id, key, label, toValue = Number) => {
       const el = $(id);
-      el.addEventListener('input', () => { state[key] = +el.value; showValues(); debounced(updateFormula); });
-      el.addEventListener('change', () => T.trackEngagement('filter', label, el.value));
+      el.addEventListener('input', () => { state[key] = toValue(el.value); showValues(); debounced(updateFormula); });
+      el.addEventListener('change', () => T.trackEngagement('filter', label, state[key]));
     };
     bind('exp-gni', 'expGni', 'gni_exponent_slider');
     bind('exp-cpr', 'expCpr', 'cpr_exponent_slider');
     bind('base', 'base', 'base_allocation_slider');
-    bind('cutoff', 'cutoff', 'gni_cutoff_slider');
+    $('cutoff').max = CUTOFF_STOPS.length - 1;
+    $('cutoff').value = CUTOFF_STOPS.indexOf(state.cutoff);
+    bind('cutoff', 'cutoff', 'gni_cutoff_slider', v => CUTOFF_STOPS[+v]);
 
     $('cutoff-on').addEventListener('change', e => {
       state.cutoffOn = e.target.checked;
@@ -152,16 +162,33 @@
       T.trackEngagement('filter', 'gni_cutoff_toggle', state.cutoffOn ? 'on' : 'off');
     });
 
-    // Scenarios: the FY25 formula, optionally with a different GNI per capita exponent
-    const applyScenario = (expGni, name) => {
-      Object.assign(state, { expGni, expCpr: FY25.exp_cpr, base: FY25.base, cutoffOn: false });
+    // Scenarios. "FY25 formula" resets every control. The reform buttons are toggles that
+    // change only their own control, so they can be combined; their pressed state is
+    // kept in sync with the sliders in showValues().
+    const syncControls = () => {
       $('exp-gni').value = state.expGni; $('exp-cpr').value = state.expCpr; $('base').value = state.base;
-      $('cutoff-on').checked = false; $('cutoff').disabled = true;
+      $('cutoff-on').checked = state.cutoffOn; $('cutoff').disabled = !state.cutoffOn;
+      $('cutoff').value = CUTOFF_STOPS.indexOf(state.cutoff);
       showValues(); updateFormula();
-      T.trackEngagement('preset', 'scenario_preset', name);
     };
-    $('scenario-fy25').addEventListener('click', () => applyScenario(FY25.exp_gni, 'fy25'));
-    $('scenario-double-gni').addEventListener('click', () => applyScenario(2 * FY25.exp_gni, 'double_gni_exponent'));
+    $('scenario-fy25').addEventListener('click', () => {
+      Object.assign(state, { expGni: FY25.exp_gni, expCpr: FY25.exp_cpr, base: FY25.base, cutoffOn: false });
+      syncControls();
+      T.trackEngagement('preset', 'scenario_preset', 'fy25');
+    });
+    $('scenario-double-gni').addEventListener('click', () => {
+      const on = !doubleGniActive();
+      state.expGni = on ? 2 * FY25.exp_gni : FY25.exp_gni;
+      syncControls();
+      T.trackEngagement('preset', 'scenario_preset', on ? 'double_gni_exponent' : 'double_gni_exponent_off');
+    });
+    $('scenario-threshold').addEventListener('click', () => {
+      const on = !thresholdActive();
+      state.cutoffOn = on;
+      if (on) state.cutoff = IDA_THRESHOLD;
+      syncControls();
+      T.trackEngagement('preset', 'scenario_preset', on ? 'ida_income_threshold' : 'ida_income_threshold_off');
+    });
 
     segmented('xaxis', v => { state.xAxis = v; updateScatter(); T.trackEngagement('view_control', 'scatter_x_axis', v); });
     segmented('metric', v => { state.metric = v; updateScatter(); updateMovers(); T.trackEngagement('view_control', 'change_metric', v); });
@@ -178,11 +205,17 @@
     }));
   }
 
+  const doubleGniActive = () => Math.abs(state.expGni - 2 * FY25.exp_gni) < 1e-9;
+  const thresholdActive = () => state.cutoffOn && state.cutoff === IDA_THRESHOLD;
+
   function showValues() {
+    $('scenario-double-gni').setAttribute('aria-pressed', doubleGniActive());
+    $('scenario-threshold').setAttribute('aria-pressed', thresholdActive());
     $('exp-gni-val').textContent = fmtExp(state.expGni);
     $('exp-cpr-val').textContent = state.expCpr.toFixed(1);
     $('base-val').textContent = 'SDR ' + state.base + 'm';
     $('cutoff-val').textContent = state.cutoffOn ? fmtUsd(state.cutoff) : 'none';
+    $('cutoff').setAttribute('aria-valuetext', fmtUsd(state.cutoff));
     $('sup-gni').textContent = fmtExp(state.expGni);
     $('sup-cpr').textContent = +state.expCpr.toFixed(1);
   }
@@ -251,6 +284,34 @@
     pov: { label: 'Poverty rate', type: 'linear', get: r => r.pov * 100, tick: v => v + '%' }
   };
 
+  // Dashed vertical line at the GNI per capita cutoff (chart.$cutoff, or null for none)
+  const cutoffLinePlugin = {
+    id: 'cutoffLine',
+    beforeDatasetsDraw(chart) {
+      const v = chart.$cutoff;
+      if (v == null) return;
+      const { ctx, chartArea: a, scales: { x } } = chart;
+      const px = x.getPixelForValue(v);
+      if (!(px >= a.left && px <= a.right)) return;
+      ctx.save();
+      ctx.strokeStyle = COLORS.tealGray;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 3]);
+      ctx.beginPath();
+      ctx.moveTo(px, a.top);
+      ctx.lineTo(px, a.bottom);
+      ctx.stroke();
+      const text = 'Cutoff ' + fmtUsd(v);
+      ctx.font = `12px ${Chart.defaults.font.family}`;
+      ctx.fillStyle = COLORS.darkGray;
+      ctx.textBaseline = 'top';
+      const flip = px + 4 + ctx.measureText(text).width > a.right;
+      ctx.textAlign = flip ? 'right' : 'left';
+      ctx.fillText(text, px + (flip ? -4 : 4), a.top + 2);
+      ctx.restore();
+    }
+  };
+
   function updateScatter(R = rows()) {
     const ax = X_AXES[state.xAxis];
     const yKey = state.metric;
@@ -261,6 +322,7 @@
       charts.scatter = new Chart($('scatter'), {
         type: 'scatter',
         data: { datasets: [{ data: pts, pointRadius: 5, pointHoverRadius: 7, borderWidth: 0 }] },
+        plugins: [cutoffLinePlugin],
         options: {
           maintainAspectRatio: false,
           scales: {
@@ -299,6 +361,7 @@
     }
     $('scatter-ylabel').textContent = yLabel;
     ch.options.scales.y.ticks = { callback: v => yKey === 'pct' ? v + '%' : fmt(v, 0) };
+    ch.$cutoff = state.cutoffOn && state.xAxis === 'gnipc' ? state.cutoff : null;
     ch.update();
   }
 

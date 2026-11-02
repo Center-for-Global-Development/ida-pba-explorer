@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IDA Allocation Formula Explorer</title>
   <link rel="stylesheet" href="https://use.typekit.net/ymp6ujv.css">
-  <link rel="stylesheet" href="css/styles.css?v=202611020405">
+  <link rel="stylesheet" href="css/styles.css?v=202611020420">
   <script>
     // Opened directly rather than embedded in an iframe: show the draft banner and page spacing
     if (window.self === window.top) document.documentElement.classList.add('standalone');
@@ -46,16 +46,17 @@
       </div>
       <div class="control">
         <label for="cutoff">GNI per capita cutoff <span class="value" id="cutoff-val"></span></label>
-        <input type="range" id="cutoff" min="1000" max="12000" step="250" value="4000" disabled aria-describedby="cutoff-hint">
+        <input type="range" id="cutoff" min="0" max="45" step="1" value="13" disabled aria-describedby="cutoff-hint">
         <label class="check"><input type="checkbox" id="cutoff-on"> Apply a cutoff</label>
-        <div class="hint" id="cutoff-hint">Countries at or above this receive no allocation (including base and FCV). FY25: none</div>
+        <div class="hint" id="cutoff-hint">Countries at or above this receive no allocation (including base and FCV). IDA income threshold: $1,365. FY25: none</div>
       </div>
     </div>
     <div class="row-actions">
       <div class="scenarios" role="group" aria-labelledby="scenarios-label">
         <span class="label" id="scenarios-label">Scenarios</span>
         <button type="button" class="btn" id="scenario-fy25">FY25 formula</button>
-        <button type="button" class="btn" id="scenario-double-gni">Double the GNI per capita exponent</button>
+        <button type="button" class="btn" id="scenario-double-gni" aria-pressed="false">Double the GNI per capita exponent</button>
+        <button type="button" class="btn" id="scenario-threshold" aria-pressed="false">Apply the IDA income threshold ($1,365)</button>
       </div>
       <div class="control" id="povline-wrap" hidden>
         <label for="povline" class="visually-hidden">Poverty line</label>
@@ -175,12 +176,12 @@
 </div>
 
 <script>window.CGD_INTERACTIVE_NAME = 'ida-pba-explorer';</script>
-<script src="tracking.js?v=202611020405"></script>
+<script src="tracking.js?v=202611020420"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
         integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
         crossorigin="anonymous"></script>
-<script src="js/model.js?v=202611020405"></script>
-<script src="js/app.js?v=202611020405"></script>
+<script src="js/model.js?v=202611020420"></script>
+<script src="js/app.js?v=202611020420"></script>
 
 <!-- CGD iframe resize (embed side) -->
 <script>
