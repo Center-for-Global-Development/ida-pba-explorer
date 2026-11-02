@@ -77,6 +77,7 @@
     TOTAL = data.meta.total_allocation;
     state.povLine = String(data.meta.poverty_lines[0]);
     baseline = M.run(C, fy25Params());
+    POP_MAX = Math.max(...C.map(c => c.pop));
 
     setupChartDefaults();
     setupTabs();
@@ -240,7 +241,7 @@
     return C.map((c, i) => {
       const b = baseline[i].alloc, n = current[i].alloc;
       return {
-        i, country: c.country, gnipc: c.gnipc, cpr: c.cpr, pov: c.pov[state.povLine],
+        i, country: c.country, iso3: c.iso3, pop: c.pop, gnipc: c.gnipc, cpr: c.cpr, pov: c.pov[state.povLine],
         base: b, now: n, abs: n - b, pct: b > 0 ? (n / b - 1) * 100 : 0,
         eligible: current[i].eligible
       };
@@ -312,17 +313,68 @@
     }
   };
 
+  // Dot area is proportional to population, with a floor so very small states stay visible
+  // and a smaller ceiling on narrow screens
+  let POP_MAX = 1;
+  const dotRadius = (pop, chartWidth) =>
+    Math.max(2.5, (chartWidth < 500 ? 10 : 15) * Math.sqrt(pop / POP_MAX));
+
+  // Countries labelled directly on the scatter: the blog post's examples and the largest countries
+  const LABELLED = new Set(['GHA', 'GUY', 'BDI', 'PAK', 'NGA', 'BGD', 'COD']);
+  const SHORT_NAMES = { COD: 'DRC' };
+  const scatterLabelsPlugin = {
+    id: 'scatterLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx, chartArea: a } = chart;
+      const ds = chart.data.datasets[0];
+      const placed = [];
+      ctx.save();
+      ctx.font = `italic 300 12px ${Chart.defaults.font.family}`;
+      ctx.textBaseline = 'middle';
+      ctx.lineJoin = 'round';
+      chart.getDatasetMeta(0).data.forEach((el, k) => {
+        const r = ds.data[k] && ds.data[k].r;
+        if (!r || !LABELLED.has(r.iso3) || el.skip) return;
+        const rad = el.options.radius + 3;
+        const name = SHORT_NAMES[r.iso3] || r.country;
+        const w = ctx.measureText(name).width, h = 14;
+        // Try right, left, above, below; skip the label if every spot collides
+        const spots = [
+          [el.x + rad, el.y - h / 2], [el.x - rad - w, el.y - h / 2],
+          [el.x - w / 2, el.y - rad - h], [el.x - w / 2, el.y + rad]
+        ];
+        const fits = ([x, y]) => x >= a.left && x + w <= a.right && y >= a.top && y + h <= a.bottom &&
+          !placed.some(p => x < p.x + p.w && x + w > p.x && y < p.y + p.h && y + h > p.y);
+        const spot = spots.find(fits);
+        if (!spot) return;
+        placed.push({ x: spot[0], y: spot[1], w, h });
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.lineWidth = 3;
+        ctx.strokeText(name, spot[0], spot[1] + h / 2);
+        ctx.fillStyle = COLORS.tealBlack;
+        ctx.fillText(name, spot[0], spot[1] + h / 2);
+      });
+      ctx.restore();
+    }
+  };
+
   function updateScatter(R = rows()) {
     const ax = X_AXES[state.xAxis];
     const yKey = state.metric;
-    const pts = R.map(r => ({ x: ax.get(r), y: r[yKey], r }));
+    // Largest first, so small countries are drawn on top
+    const pts = R.map(r => ({ x: ax.get(r), y: r[yKey], r })).sort((p, q) => q.r.pop - p.r.pop);
     const yLabel = yKey === 'pct' ? 'Change in allocation (%)' : 'Change in allocation (SDR m)';
 
     if (!charts.scatter) {
       charts.scatter = new Chart($('scatter'), {
         type: 'scatter',
-        data: { datasets: [{ data: pts, pointRadius: 5, pointHoverRadius: 7, borderWidth: 0 }] },
-        plugins: [cutoffLinePlugin],
+        data: { datasets: [{
+          data: pts,
+          pointRadius: ctx => ctx.raw ? dotRadius(ctx.raw.r.pop, ctx.chart.width) : 3,
+          pointHoverRadius: ctx => ctx.raw ? dotRadius(ctx.raw.r.pop, ctx.chart.width) + 2 : 5,
+          borderWidth: 1, borderColor: '#fff', hoverBorderColor: '#fff'
+        }] },
+        plugins: [cutoffLinePlugin, scatterLabelsPlugin],
         options: {
           maintainAspectRatio: false,
           scales: {
@@ -340,7 +392,8 @@
                   return [
                     r.country,
                     `SDR ${fmt(r.base)}m → ${fmt(r.now)}m (${fmtSigned(r.pct)}%)`,
-                    `GNI pc ${fmtUsd(r.gnipc)} · CPR ${r.cpr.toFixed(2)} · poverty ${fmt(r.pov * 100)}%`
+                    `GNI pc ${fmtUsd(r.gnipc)} · CPR ${r.cpr.toFixed(2)} · poverty ${fmt(r.pov * 100)}%`,
+                    `Population ${fmt(r.pop)}m`
                   ];
                 }
               }

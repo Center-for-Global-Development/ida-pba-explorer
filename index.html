@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IDA Allocation Formula Explorer</title>
   <link rel="stylesheet" href="https://use.typekit.net/ymp6ujv.css">
-  <link rel="stylesheet" href="css/styles.css?v=202611020420">
+  <link rel="stylesheet" href="css/styles.css?v=202611020431">
   <script>
     // Opened directly rather than embedded in an iframe: show the draft banner and page spacing
     if (window.self === window.top) document.documentElement.classList.add('standalone');
@@ -86,10 +86,11 @@
       <span style="--c: var(--cgd-light-teal)">Gains</span>
       <span style="--c: var(--cgd-gold)">Loses</span>
       <span style="--c: var(--cgd-teal-gray)">Excluded by cutoff</span>
+      <span class="size-key">Dot size: population</span>
     </div>
     <div class="axis-label" id="scatter-ylabel" aria-hidden="true">Change in allocation (%)</div>
     <div class="chart-box"><canvas id="scatter" role="img" aria-label="Scatter chart of each country's change in allocation. The full figures are in the table below."></canvas></div>
-    <p class="note">Change compared with the FY25 formula. Hover or tap a point for details. Each point is a country.</p>
+    <p class="note">Change compared with the FY25 formula. Each point is a country, sized by population. Hover or tap a point for details.</p>
 
     <h2>Biggest gainers and losers</h2>
     <div class="chart-box tall"><canvas id="movers" role="img" aria-label="Bar chart of the ten countries that gain most and the ten that lose most. The full figures are in the table below."></canvas></div>
@@ -176,12 +177,12 @@
 </div>
 
 <script>window.CGD_INTERACTIVE_NAME = 'ida-pba-explorer';</script>
-<script src="tracking.js?v=202611020420"></script>
+<script src="tracking.js?v=202611020431"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
         integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
         crossorigin="anonymous"></script>
-<script src="js/model.js?v=202611020420"></script>
-<script src="js/app.js?v=202611020420"></script>
+<script src="js/model.js?v=202611020431"></script>
+<script src="js/app.js?v=202611020431"></script>
 
 <!-- CGD iframe resize (embed side) -->
 <script>

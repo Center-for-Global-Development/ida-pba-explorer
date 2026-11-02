@@ -182,6 +182,10 @@ select {
   content: ''; display: inline-block; width: 0.75rem; height: 0.75rem;
   border-radius: 50%; margin-right: 0.35rem; vertical-align: -1px; background: var(--c);
 }
+.legend-inline .size-key::before {
+  width: auto; height: auto; border-radius: 0; background: none; vertical-align: 0;
+  content: '\25CF\00a0\2B24'; color: var(--cgd-teal-gray); font-size: 0.7em; letter-spacing: 0.05em;
+}
 
 /* ---- Tables ---- */
 .table-scroll { overflow-x: auto; max-height: 32rem; overflow-y: auto; border: 1px solid var(--cgd-light-gray); }
