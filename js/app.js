@@ -20,6 +20,8 @@
   };
   const fmtExp = x => (x < 0 ? '−' : '') + Math.abs(x).toFixed(3).replace(/0$/, '');
   const fmtUsd = x => '$' + Math.round(x).toLocaleString('en-US');
+  // Analytics values rounded to 1 d.p. to keep GA4 cardinality low (avoids "-0.0")
+  const round1 = x => (Math.round(x * 10) / 10).toFixed(1);
 
   let DATA, C, FY25, TOTAL;
   let baseline;          // results under the FY25 formula
@@ -473,7 +475,7 @@
 
     const g = $('gni-factor');
     g.addEventListener('input', () => { tab2.gniFactor = sliderToFactor(+g.value); updateCountry(); });
-    g.addEventListener('change', () => T.trackEngagement('filter', 'gni_multiplier_slider', tab2.gniFactor.toFixed(2)));
+    g.addEventListener('change', () => T.trackEngagement('filter', 'gni_multiplier_slider', round1(tab2.gniFactor)));
     $('reset-country').addEventListener('click', () => {
       tab2.gniFactor = 1;
       tab2.cprDelta = 0;
@@ -484,7 +486,7 @@
 
     const d = $('cpr-delta');
     d.addEventListener('input', () => { tab2.cprDelta = +d.value; updateCountry(); });
-    d.addEventListener('change', () => T.trackEngagement('filter', 'cpr_change_slider', tab2.cprDelta.toFixed(2)));
+    d.addEventListener('change', () => T.trackEngagement('filter', 'cpr_change_slider', round1(tab2.cprDelta)));
   }
 
   function updateCountry() {

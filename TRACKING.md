@@ -25,8 +25,8 @@ Tracking implemented per the CGD Interactive Analytics Tracking Standard (`analy
 | `filter` | `country_select` | country name (74 values) | Tab 2 |
 | `filter` | `change_variable` | `gni`, `cpr` | Tab 2 |
 | `filter` | `formula_basis` | `fy25`, `mine` | Tab 2 |
-| `filter` | `gni_multiplier_slider` | multiplier, 2 d.p. (0.25 to 10) | Tab 2, fires on `change` |
-| `filter` | `cpr_change_slider` | CPR change, 2 d.p. (−1.5 to 1.5) | Tab 2, fires on `change` |
+| `filter` | `gni_multiplier_slider` | multiplier, rounded to 1 d.p. (0.3 to 10.0, about 100 values) | Tab 2, fires on `change` |
+| `filter` | `cpr_change_slider` | CPR change, rounded to 1 d.p. (−1.5 to 1.5, 31 values) | Tab 2, fires on `change` |
 | `preset` | `reset_country_change` | | Tab 2: sets GNI multiplier to x1 and CPR change to 0 |
 
 ## Not Tracked
