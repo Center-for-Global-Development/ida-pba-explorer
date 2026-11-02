@@ -141,6 +141,8 @@ select {
 .btn:disabled:hover { background: #fff; color: var(--cgd-teal); }
 
 .row-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem; }
+.scenarios { display: flex; gap: 0.5rem 0.75rem; align-items: center; flex-wrap: wrap; }
+.scenarios .label { font-weight: 600; color: var(--cgd-teal); font-size: 0.95rem; }
 
 .segmented { display: inline-flex; border: 1px solid var(--cgd-teal); border-radius: 3px; overflow: hidden; }
 .segmented button {

@@ -13,6 +13,8 @@ An interactive tool for exploring the World Bank IDA performance-based allocatio
 - the base allocation per country (SDR 0–50m; FY25: SDR 15m)
 - an optional GNI per capita cutoff, above which a country receives nothing (no PBA, base or FCV)
 
+Two scenario buttons set all four controls at once: the FY25 formula, and the FY25 formula with the GNI per capita exponent doubled (−0.125 to −0.25).
+
 It shows which countries gain and lose compared with the FY25 formula, plotted against GNI per capita, CPR or poverty. It also shows how the correlation between allocation per person and the poverty rate changes, for four measures: the formula only, + FCV, + base, and + FCV + base.
 
 **Tab 2: Change a country's data.** Users change one country's GNI per capita (multiplicative) or CPR (additive). The tool shows the effect on its allocation, and the change in the other variable that would have the same effect. This uses either the FY25 formula or the user's tab 1 settings.

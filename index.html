@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IDA Allocation Formula Explorer</title>
   <link rel="stylesheet" href="https://use.typekit.net/ymp6ujv.css">
-  <link rel="stylesheet" href="css/styles.css?v=202611020401">
+  <link rel="stylesheet" href="css/styles.css?v=202611020405">
   <script>
     // Opened directly rather than embedded in an iframe: show the draft banner and page spacing
     if (window.self === window.top) document.documentElement.classList.add('standalone');
@@ -52,7 +52,11 @@
       </div>
     </div>
     <div class="row-actions">
-      <button type="button" class="btn" id="reset">Reset to FY25 formula</button>
+      <div class="scenarios" role="group" aria-labelledby="scenarios-label">
+        <span class="label" id="scenarios-label">Scenarios</span>
+        <button type="button" class="btn" id="scenario-fy25">FY25 formula</button>
+        <button type="button" class="btn" id="scenario-double-gni">Double the GNI per capita exponent</button>
+      </div>
       <div class="control" id="povline-wrap" hidden>
         <label for="povline" class="visually-hidden">Poverty line</label>
         <select id="povline"></select>
@@ -171,12 +175,12 @@
 </div>
 
 <script>window.CGD_INTERACTIVE_NAME = 'ida-pba-explorer';</script>
-<script src="tracking.js?v=202611020401"></script>
+<script src="tracking.js?v=202611020405"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
         integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
         crossorigin="anonymous"></script>
-<script src="js/model.js?v=202611020401"></script>
-<script src="js/app.js?v=202611020401"></script>
+<script src="js/model.js?v=202611020405"></script>
+<script src="js/app.js?v=202611020405"></script>
 
 <!-- CGD iframe resize (embed side) -->
 <script>

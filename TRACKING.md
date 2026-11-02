@@ -17,7 +17,7 @@ Tracking implemented per the CGD Interactive Analytics Tracking Standard (`analy
 | `filter` | `gni_cutoff_slider` | slider value (1,000 to 12,000, step 250) | Fires on `change` |
 | `filter` | `gni_cutoff_toggle` | `on`, `off` | |
 | `filter` | `poverty_line_select` | poverty line, e.g. `3` | Only shown if more than one line is in the data |
-| `preset` | `reset_fy25` | | Resets formula to FY25 |
+| `preset` | `scenario_preset` | `fy25`, `double_gni_exponent` | Scenario buttons: FY25 formula, or FY25 with the GNI per capita exponent doubled (−0.25) |
 | `view_control` | `scatter_x_axis` | `gnipc`, `cpr`, `pov` | |
 | `view_control` | `change_metric` | `pct`, `abs` | |
 | `view_control` | `table_sort` | column key (`country`, `gnipc`, `cpr`, `pov`, `base`, `now`, `abs`, `pct`) | |

@@ -152,13 +152,16 @@
       T.trackEngagement('filter', 'gni_cutoff_toggle', state.cutoffOn ? 'on' : 'off');
     });
 
-    $('reset').addEventListener('click', () => {
-      Object.assign(state, { expGni: FY25.exp_gni, expCpr: FY25.exp_cpr, base: FY25.base, cutoffOn: false });
+    // Scenarios: the FY25 formula, optionally with a different GNI per capita exponent
+    const applyScenario = (expGni, name) => {
+      Object.assign(state, { expGni, expCpr: FY25.exp_cpr, base: FY25.base, cutoffOn: false });
       $('exp-gni').value = state.expGni; $('exp-cpr').value = state.expCpr; $('base').value = state.base;
       $('cutoff-on').checked = false; $('cutoff').disabled = true;
       showValues(); updateFormula();
-      T.trackEngagement('preset', 'reset_fy25');
-    });
+      T.trackEngagement('preset', 'scenario_preset', name);
+    };
+    $('scenario-fy25').addEventListener('click', () => applyScenario(FY25.exp_gni, 'fy25'));
+    $('scenario-double-gni').addEventListener('click', () => applyScenario(2 * FY25.exp_gni, 'double_gni_exponent'));
 
     segmented('xaxis', v => { state.xAxis = v; updateScatter(); T.trackEngagement('view_control', 'scatter_x_axis', v); });
     segmented('metric', v => { state.metric = v; updateScatter(); updateMovers(); T.trackEngagement('view_control', 'change_metric', v); });
