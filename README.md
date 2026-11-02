@@ -17,7 +17,13 @@ Three scenario buttons sit under the controls. "FY25 formula" resets every contr
 
 It shows which countries gain and lose compared with the FY25 formula, plotted against GNI per capita, CPR or poverty. It also shows how the correlation between allocation per person and the poverty rate changes, for four measures: the formula only, + FCV, + base, and + FCV + base.
 
-**Tab 2: Change a country's data.** Users change one country's GNI per capita (multiplicative) or CPR (additive). The tool shows the effect on its allocation, and the change in the other variable that would have the same effect. This uses either the FY25 formula or the user's tab 1 settings.
+**Tab 2: Change a country's data.** Users change one country's GNI per capita (multiplicative) or CPR (additive). The tool shows the effect on its allocation, and the change in the other variable that would have the same effect. This uses either the FY25 formula or the user's tab 1 settings. The GNI per capita multiplier runs from ×0.25 to ×20.
+
+Three scenario buttons reproduce the blog post's Ghana examples. Each selects Ghana and sets one change, leaving the formula choice as it is:
+
+- **Ghana as rich as New Zealand:** GNI per capita × 19.9 ($2,340 to $46,630). The equivalent CPR is about Tajikistan's.
+- **Ghana 8× richer (like Panama):** GNI per capita × 8. The equivalent CPR is about Vanuatu's.
+- **World Bank vs AfDB governance score gap:** CPR + 0.129, which is the average 0.14 gap between World Bank and AfDB CPIA scores times CPIA's 92% weight in the CPR.
 
 ## The model
 

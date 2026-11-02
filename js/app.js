@@ -43,8 +43,9 @@
   CUTOFF_STOPS.sort((a, b) => a - b);
 
   // GNI per capita multiplier slider: factor = 10^(v/500), so v = 0 is exactly x1,
-  // v = 500 is x10 and v = -301 is x0.25
-  const GNI_MIN = 0.25, GNI_MAX = 10;
+  // v = 500 is x10, v = 650 is about x20 and v = -301 is x0.25
+  const GNI_MIN = 0.25, GNI_MAX = 20;
+  const factorToSlider = f => Math.round(500 * Math.log10(f));
   const sliderToFactor = v => Math.pow(10, v / 500);
   const tab2 = { index: 0, mode: 'gni', gniFactor: sliderToFactor(21), cprDelta: 0.1, basis: 'fy25' };
 
@@ -579,10 +580,14 @@
       T.trackEngagement('filter', 'country_select', C[tab2.index].country);
     });
 
+    const setMode = mode => {
+      tab2.mode = mode;
+      document.querySelectorAll('input[name="mode"]').forEach(r => { r.checked = r.value === mode; });
+      $('gni-ctrl').hidden = mode !== 'gni';
+      $('cpr-ctrl').hidden = mode !== 'cpr';
+    };
     document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', () => {
-      tab2.mode = r.value;
-      $('gni-ctrl').hidden = tab2.mode !== 'gni';
-      $('cpr-ctrl').hidden = tab2.mode !== 'cpr';
+      setMode(r.value);
       updateCountry();
       T.trackEngagement('filter', 'change_variable', tab2.mode);
     }));
@@ -594,22 +599,54 @@
 
     const g = $('gni-factor');
     g.addEventListener('input', () => { tab2.gniFactor = sliderToFactor(+g.value); updateCountry(); });
-    g.addEventListener('change', () => T.trackEngagement('filter', 'gni_multiplier_slider', round1(tab2.gniFactor)));
+    g.addEventListener('change', () => T.trackEngagement('filter', 'gni_multiplier_slider',
+      tab2.gniFactor >= 10 ? String(Math.round(tab2.gniFactor)) : round1(tab2.gniFactor)));
+    const resetChange = () => { tab2.gniFactor = 1; tab2.cprDelta = 0; g.value = 0; };
     $('reset-country').addEventListener('click', () => {
-      tab2.gniFactor = 1;
-      tab2.cprDelta = 0;
-      g.value = 0;
+      resetChange();
       updateCountry();
       T.trackEngagement('preset', 'reset_country_change');
     });
+
+    // Scenarios from the blog post. Each selects Ghana and sets one change; the formula
+    // basis is left as it is. Clicking a pressed scenario resets to no change.
+    COUNTRY_SCENARIOS.forEach(s => $(s.id).addEventListener('click', () => {
+      const on = !countryScenarioActive(s);
+      if (on) {
+        tab2.index = C.findIndex(c => c.iso3 === s.iso3);
+        sel.value = tab2.index;
+        setMode(s.mode);
+        if (s.mode === 'gni') { tab2.gniFactor = s.value(); g.value = factorToSlider(tab2.gniFactor); }
+        else tab2.cprDelta = s.value();
+      } else {
+        resetChange();
+      }
+      updateCountry();
+      T.trackEngagement('preset', 'country_scenario', on ? s.name : s.name + '_off');
+    }));
 
     const d = $('cpr-delta');
     d.addEventListener('input', () => { tab2.cprDelta = +d.value; updateCountry(); });
     d.addEventListener('change', () => T.trackEngagement('filter', 'cpr_change_slider', round1(tab2.cprDelta)));
   }
 
+  // Tab 2 scenarios, from the blog post's Ghana examples
+  const byIso = iso => C.find(c => c.iso3 === iso);
+  const COUNTRY_SCENARIOS = [
+    // GNI per capita from $2,340 to New Zealand's $46,630
+    { id: 'cs-new-zealand', name: 'ghana_new_zealand', iso3: 'GHA', mode: 'gni', value: () => 46630 / byIso('GHA').gnipc },
+    // About as rich as Panama or Trinidad and Tobago
+    { id: 'cs-eightfold', name: 'ghana_8x', iso3: 'GHA', mode: 'gni', value: () => 8 },
+    // Average gap between World Bank and AfDB CPIA scores (0.14) x CPIA's 92% weight in CPR
+    { id: 'cs-afdb', name: 'afdb_cpia_gap', iso3: 'GHA', mode: 'cpr', value: () => 0.129 }
+  ];
+  const countryScenarioActive = s =>
+    C[tab2.index].iso3 === s.iso3 && tab2.mode === s.mode &&
+    Math.abs((s.mode === 'gni' ? tab2.gniFactor : tab2.cprDelta) - s.value()) < 1e-9;
+
   function updateCountry() {
     if (!C) return;
+    COUNTRY_SCENARIOS.forEach(s => $(s.id).setAttribute('aria-pressed', countryScenarioActive(s)));
     const i = tab2.index, c = C[i];
     const p = tab2.basis === 'mine' ? params() : fy25Params();
     const before = M.run(C, p)[i];
@@ -719,7 +756,7 @@
             x: {
               type: 'logarithmic', min: GNI_MIN, max: GNI_MAX,
               title: { display: true, text: 'GNI per capita multiplier (log scale)', color: COLORS.teal },
-              afterBuildTicks: axis => { axis.ticks = [0.25, 0.5, 1, 2, 5, 10].map(value => ({ value })); },
+              afterBuildTicks: axis => { axis.ticks = [0.25, 0.5, 1, 2, 5, 10, 20].map(value => ({ value })); },
               ticks: { callback: v => '×' + v },
               grid: { color: ctx => ctx.tick.value === 1 ? COLORS.tealBlack : COLORS.lightGray },
               border: { display: false }
