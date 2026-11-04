@@ -13,7 +13,7 @@ An interactive tool for exploring the World Bank IDA performance-based allocatio
 - the base allocation per country (SDR 0–50m; FY25: SDR 15m)
 - an optional GNI per capita cutoff, above which a country receives nothing (no PBA, base or FCV). The slider moves in $250 steps, with an extra stop at IDA's $1,365 income threshold.
 
-Three scenario buttons sit under the controls. "FY25 formula" resets every control. "Double the GNI per capita exponent" (−0.125 to −0.25) and "Apply the IDA income threshold ($1,365)" are toggles that change only their own control, so they can be combined. They show as pressed whenever their setting is active, including when it is reached with the sliders.
+Two scenario buttons sit under the controls. "FY25 formula" resets every control. "Double the GNI per capita exponent" (−0.125 to −0.25) is a toggle that changes only that control, so it can be combined with other settings. It shows as pressed whenever the exponent is −0.25, including when that is reached with the slider.
 
 It shows which countries gain and lose compared with the FY25 formula, plotted against GNI per capita, CPR or poverty. It also shows how the correlation between allocation per person and the poverty rate changes, for four measures: the formula only, + FCV, + base, and + FCV + base.
 
@@ -23,7 +23,7 @@ Three scenario buttons reproduce the blog post's Ghana examples. Each selects Gh
 
 - **Ghana as rich as New Zealand:** GNI per capita × 19.9 ($2,340 to $46,630). The equivalent CPR is about Tajikistan's.
 - **Ghana 8× richer (like Panama):** GNI per capita × 8. The equivalent CPR is about Vanuatu's.
-- **World Bank vs AfDB governance score gap:** CPR + 0.129, which is the average 0.14 gap between World Bank and AfDB CPIA scores times CPIA's 92% weight in the CPR.
+- **Average World Bank vs AfDB governance score gap:** CPR + 0.129, which is the average 0.14 gap between World Bank and AfDB CPIA scores across countries, times CPIA's 92% weight in the CPR. It is an average, not Ghana's own gap, and the tool says so when the scenario is active.
 
 ## The model
 

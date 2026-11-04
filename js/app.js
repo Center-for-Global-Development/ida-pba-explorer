@@ -164,9 +164,9 @@
       T.trackEngagement('filter', 'gni_cutoff_toggle', state.cutoffOn ? 'on' : 'off');
     });
 
-    // Scenarios. "FY25 formula" resets every control. The reform buttons are toggles that
-    // change only their own control, so they can be combined; their pressed state is
-    // kept in sync with the sliders in showValues().
+    // Scenarios. "FY25 formula" resets every control. "Double the GNI per capita exponent"
+    // is a toggle that changes only that control; its pressed state is kept in sync with
+    // the slider in showValues().
     const syncControls = () => {
       $('exp-gni').value = state.expGni; $('exp-cpr').value = state.expCpr; $('base').value = state.base;
       $('cutoff-on').checked = state.cutoffOn; $('cutoff').disabled = !state.cutoffOn;
@@ -183,13 +183,6 @@
       state.expGni = on ? 2 * FY25.exp_gni : FY25.exp_gni;
       syncControls();
       T.trackEngagement('preset', 'scenario_preset', on ? 'double_gni_exponent' : 'double_gni_exponent_off');
-    });
-    $('scenario-threshold').addEventListener('click', () => {
-      const on = !thresholdActive();
-      state.cutoffOn = on;
-      if (on) state.cutoff = IDA_THRESHOLD;
-      syncControls();
-      T.trackEngagement('preset', 'scenario_preset', on ? 'ida_income_threshold' : 'ida_income_threshold_off');
     });
 
     segmented('xaxis', v => { state.xAxis = v; updateScatter(); T.trackEngagement('view_control', 'scatter_x_axis', v); });
@@ -208,11 +201,9 @@
   }
 
   const doubleGniActive = () => Math.abs(state.expGni - 2 * FY25.exp_gni) < 1e-9;
-  const thresholdActive = () => state.cutoffOn && state.cutoff === IDA_THRESHOLD;
 
   function showValues() {
     $('scenario-double-gni').setAttribute('aria-pressed', doubleGniActive());
-    $('scenario-threshold').setAttribute('aria-pressed', thresholdActive());
     $('exp-gni-val').textContent = fmtExp(state.expGni);
     $('exp-cpr-val').textContent = state.expCpr.toFixed(1);
     $('base-val').textContent = 'SDR ' + state.base + 'm';
@@ -707,6 +698,11 @@
         }
       }
       equiv_point = { x: f, y: tab2.cprDelta };
+    }
+
+    if (countryScenarioActive(COUNTRY_SCENARIOS.find(s => s.name === 'afdb_cpia_gap'))) {
+      warn.push('This scenario uses the <strong>average</strong> gap between World Bank and AfDB CPIA scores across countries (0.14, ' +
+        'which is +0.13 on the CPR because the CPIA makes up 92% of it). The gap for any one country, including Ghana, can be larger or smaller.');
     }
 
     if (before.capped || c.iso3 === 'PAK') {

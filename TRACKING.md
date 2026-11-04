@@ -17,7 +17,7 @@ Tracking implemented per the CGD Interactive Analytics Tracking Standard (`analy
 | `filter` | `gni_cutoff_slider` | cutoff in US$ (1,000 to 12,000 in steps of 250, plus 1,365) | Fires on `change` |
 | `filter` | `gni_cutoff_toggle` | `on`, `off` | |
 | `filter` | `poverty_line_select` | poverty line, e.g. `3` | Only shown if more than one line is in the data |
-| `preset` | `scenario_preset` | `fy25`, `double_gni_exponent`, `double_gni_exponent_off`, `ida_income_threshold`, `ida_income_threshold_off` | Scenario buttons. `fy25` resets all controls. The other two are toggles that change only their own control (GNI exponent to −0.25; cutoff on at $1,365); `_off` values are sent when a pressed button is clicked to turn it off |
+| `preset` | `scenario_preset` | `fy25`, `double_gni_exponent`, `double_gni_exponent_off` | Scenario buttons. `fy25` resets all controls. `double_gni_exponent` is a toggle that sets the GNI exponent to −0.25; `_off` is sent when the pressed button is clicked to turn it off |
 | `view_control` | `scatter_x_axis` | `gnipc`, `cpr`, `pov` | |
 | `view_control` | `change_metric` | `pct`, `abs` | |
 | `view_control` | `table_sort` | column key (`country`, `gnipc`, `cpr`, `pov`, `base`, `now`, `abs`, `pct`) | |
