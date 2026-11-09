@@ -55,6 +55,16 @@ ISO_OVERRIDES <- c(
   "Yemen, Republic of"              = "YEM"
 )
 
+# World Bank FY25 List of Fragile and Conflict-affected Situations (ISO3 codes),
+# matching the FY25 allocations. Source (FY06-FY26 lists, FY25 on p. 2):
+# https://thedocs.worldbank.org/en/doc/aa5bc1b55f2c7d72c157de331ab71f30-0090082026/original/C2-FCSList-FY06toFY26.pdf
+FCS_YEAR <- "FY25"
+FCS_CONFLICT <- c("AFG", "BFA", "CMR", "CAF", "COD", "ETH", "HTI", "IRQ", "LBN", "MLI", "MOZ",
+                  "MMR", "NER", "NGA", "SOM", "SSD", "SDN", "SYR", "UKR", "PSE", "YEM")
+FCS_FRAGILITY <- c("BDI", "TCD", "COM", "COG", "ERI", "GNB", "KIR", "XKX", "LBY", "MHL",
+                   "FSM", "PNG", "STP", "SLB", "TLS", "TUV", "VEN", "ZWE")
+FCS_URL <- "https://thedocs.worldbank.org/en/doc/aa5bc1b55f2c7d72c157de331ab71f30-0090082026/original/C2-FCSList-FY06toFY26.pdf"
+
 # ---- Allocations ----------------------------------------------------------------
 
 alloc <- read_excel("data/raw/FY25-Allocations-Table.xlsx", sheet = "forR", na = "na") %>%
@@ -137,7 +147,11 @@ countries <- alloc %>%
     country, iso3 = iso3c,
     cpr = round(CPR, 6), gnipc = round(gnipc, 2), pop = pop,
     fcv = FCV, allocation = round(allocation, 4),
-    gnipc_imputed, cpr_imputed
+    gnipc_imputed, cpr_imputed,
+    # FCS category: "conflict", "fragility" (institutional and social) or NA
+    fcs = case_when(iso3c %in% FCS_CONFLICT ~ "conflict",
+                    iso3c %in% FCS_FRAGILITY ~ "fragility",
+                    .default = NA_character_)
   )
 countries$pov <- pov_list
 
@@ -150,7 +164,9 @@ out <- list(
     poverty_lines = I(POVERTY_LINES),
     poverty_year = POVERTY_YEAR,
     poverty_source = "World Bank Poverty and Inequality Platform (PIP), 2021 PPP, nowcasts",
-    excluded = I(EXCLUDE)
+    excluded = I(EXCLUDE),
+    fcs_year = FCS_YEAR,
+    fcs_source = FCS_URL
   ),
   countries = countries
 )

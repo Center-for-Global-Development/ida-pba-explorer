@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IDA Allocation Formula Explorer</title>
   <link rel="stylesheet" href="https://use.typekit.net/ymp6ujv.css">
-  <link rel="stylesheet" href="css/styles.css?v=202611041050">
+  <link rel="stylesheet" href="css/styles.css?v=202611091158">
   <script>
     // Opened directly rather than embedded in an iframe: show the draft banner and page spacing
     if (window.self === window.top) document.documentElement.classList.add('standalone');
@@ -107,6 +107,22 @@
     <p class="note">"Formula only" is the performance-based portion; "+ base" adds the base allocation; "+ FCV" adds FCV allocations. Countries excluded by a cutoff count as zero.
       Poverty rates are World Bank PIP <span id="pov-year"></span> nowcasts (2021 PPP), which for some countries extrapolate from old surveys.</p>
 
+    <h2>How much goes to fragile and conflict-affected situations?</h2>
+    <p class="lede">Share of the total allocation going to countries on the World Bank's <span class="fcs-year">FY25</span> list of fragile and conflict-affected
+      situations (FCS), in total and for the list's two categories: conflict, and institutional and social fragility.</p>
+    <div class="axis-label" aria-hidden="true">Share of total allocation</div>
+    <div class="chart-box short"><canvas id="fcs" role="img" aria-label="Bar chart comparing the share of the allocation going to fragile and conflict-affected situations under the FY25 formula and your settings. Values are in the table below."></canvas></div>
+    <div class="table-x">
+    <table class="corr-table" id="fcs-table">
+      <caption class="visually-hidden">Share of the total allocation going to fragile and conflict-affected situations</caption>
+      <thead><tr><th scope="col">Countries</th><th scope="col">FY25 formula</th><th scope="col">Your settings</th><th scope="col">Change (pts)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+    <p class="note">Covers the <span id="fcs-count"></span> FCS countries in the model. Myanmar, Syria, Eritrea and Zimbabwe are on the list but outside the model;
+      the other listed economies are not funded through IDA's performance-based allocation. FCV allocations are held fixed and countries excluded by a cutoff count as zero.
+      Source: <a href="https://thedocs.worldbank.org/en/doc/aa5bc1b55f2c7d72c157de331ab71f30-0090082026/original/C2-FCSList-FY06toFY26.pdf" id="fcs-source" target="_blank" rel="noopener noreferrer">World Bank FCS lists</a>.</p>
+
     <h2>All countries</h2>
     <div class="row-actions" style="margin: 0 0 0.75rem">
       <button type="button" class="btn" id="download">Download results (CSV)</button>
@@ -182,12 +198,12 @@
 </div>
 
 <script>window.CGD_INTERACTIVE_NAME = 'ida-pba-explorer';</script>
-<script src="tracking.js?v=202611041050"></script>
+<script src="tracking.js?v=202611091158"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
         integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
         crossorigin="anonymous"></script>
-<script src="js/model.js?v=202611041050"></script>
-<script src="js/app.js?v=202611041050"></script>
+<script src="js/model.js?v=202611091158"></script>
+<script src="js/app.js?v=202611091158"></script>
 
 <!-- CGD iframe resize (embed side) -->
 <script>

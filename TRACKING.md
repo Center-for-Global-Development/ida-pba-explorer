@@ -20,7 +20,8 @@ Tracking implemented per the CGD Interactive Analytics Tracking Standard (`analy
 | `preset` | `scenario_preset` | `fy25`, `double_gni_exponent`, `double_gni_exponent_off` | Scenario buttons. `fy25` resets all controls. `double_gni_exponent` is a toggle that sets the GNI exponent to −0.25; `_off` is sent when the pressed button is clicked to turn it off |
 | `view_control` | `scatter_x_axis` | `gnipc`, `cpr`, `pov` | |
 | `view_control` | `change_metric` | `pct`, `abs` | |
-| `view_control` | `table_sort` | column key (`country`, `gnipc`, `cpr`, `pov`, `base`, `now`, `abs`, `pct`) | |
+| `view_control` | `table_sort` | column key (`country`, `gnipc`, `cpr`, `pov`, `fcs`, `base`, `now`, `abs`, `pct`) | |
+| `external_link` | `fcs_list_source` | | Link to the World Bank FCS lists |
 | `download` | `results_csv` | | CSV of the country table |
 | `filter` | `country_select` | country name (74 values) | Tab 2 |
 | `filter` | `change_variable` | `gni`, `cpr` | Tab 2 |

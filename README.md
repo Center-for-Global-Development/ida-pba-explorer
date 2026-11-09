@@ -15,7 +15,7 @@ An interactive tool for exploring the World Bank IDA performance-based allocatio
 
 Two scenario buttons sit under the controls. "FY25 formula" resets every control. "Double the GNI per capita exponent" (−0.125 to −0.25) is a toggle that changes only that control, so it can be combined with other settings. It shows as pressed whenever the exponent is −0.25, including when that is reached with the slider.
 
-It shows which countries gain and lose compared with the FY25 formula, plotted against GNI per capita, CPR or poverty. It also shows how the correlation between allocation per person and the poverty rate changes, for four measures: the formula only, + FCV, + base, and + FCV + base.
+It shows which countries gain and lose compared with the FY25 formula, plotted against GNI per capita, CPR or poverty. It also shows how the correlation between allocation per person and the poverty rate changes, for four measures: the formula only, + FCV, + base, and + FCV + base. Finally, it shows the share of the total allocation going to fragile and conflict-affected situations (FCS), in total and for the list's two categories.
 
 **Tab 2: Change a country's data.** Users change one country's GNI per capita (multiplicative) or CPR (additive). The tool shows the effect on its allocation, and the change in the other variable that would have the same effect. This uses either the FY25 formula or the user's tab 1 settings. The GNI per capita multiplier runs from ×0.25 to ×20.
 
@@ -59,6 +59,7 @@ Small states are worth keeping in mind. The base allocation gives very small cou
 |---|---|---|
 | CPR, CPIA, PPR, population, GNI per capita, allocations | World Bank, IDA FY25 allocations table (Tables 1–2), `data/raw/FY25-Allocations-Table.xlsx`, sheet `forR` | SDR million |
 | FCV allocations | [IDA FY25 Board paper, p. 21](https://documents1.worldbank.org/curated/en/099121925154535548/pdf/BOSIB-9e75e5f3-f967-4e77-804b-c17a0489b8f5.pdf#page=21) | Hard-coded in `scripts/prepare-data.R` |
+| Fragile and conflict-affected situations | [World Bank FCS lists, FY06–FY26](https://thedocs.worldbank.org/en/doc/aa5bc1b55f2c7d72c157de331ab71f30-0090082026/original/C2-FCSList-FY06toFY26.pdf), FY25 list (p. 2) | ISO3 codes hard-coded in `scripts/prepare-data.R`. 29 of the 74 modelled countries are on it (15 conflict, 14 institutional and social fragility) |
 | Poverty headcount | [World Bank Poverty and Inequality Platform](https://pip.worldbank.org) API, 2025, $3.00/day (2021 PPP), national, `fill_gaps=true` | All are nowcasts; some extrapolate from old surveys. CC BY 4.0 |
 
 **Exclusions:**

@@ -243,3 +243,8 @@ td.muted { color: var(--cgd-teal-gray); }
 
 /* Let the short correlation table wrap at narrow widths instead of overflowing */
 .corr-table th, .corr-table td { white-space: normal; padding: 0.4rem 0.4rem; }
+
+/* SDR amounts next to shares in the FCS table */
+.corr-table span.muted { display: block; color: var(--cgd-dark-gray); font-size: 0.85em; white-space: nowrap; }
+.table-x { overflow-x: auto; max-width: 40rem; }
+.table-x .corr-table { margin-top: 0.75rem; }

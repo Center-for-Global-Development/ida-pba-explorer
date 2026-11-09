@@ -88,6 +88,9 @@
     setupCountryTab();
 
     $('n-countries').textContent = C.length;
+    $('fcs-count').textContent = C.filter(c => c.fcs).length;
+    document.querySelectorAll('.fcs-year').forEach(el => el.textContent = data.meta.fcs_year);
+    $('fcs-source').addEventListener('click', () => T.trackEngagement('external_link', 'fcs_list_source'));
     $('pov-year').textContent = data.meta.poverty_year;
     const imputed = C.filter(c => c.gnipc_imputed || c.cpr_imputed).map(c => c.country);
     if (imputed.length) {
@@ -235,7 +238,7 @@
       return {
         i, country: c.country, iso3: c.iso3, pop: c.pop, gnipc: c.gnipc, cpr: c.cpr, pov: c.pov[state.povLine],
         base: b, now: n, abs: n - b, pct: b > 0 ? (n / b - 1) * 100 : 0,
-        eligible: current[i].eligible
+        eligible: current[i].eligible, fcs: c.fcs || ''
       };
     });
   }
@@ -248,6 +251,7 @@
     updateScatter(R);
     updateMovers(R);
     updateCorr();
+    updateFcs();
     updateTable(R);
     if (tab2.basis === 'mine') updateCountry();
   }
@@ -385,6 +389,7 @@
                     r.country,
                     `SDR ${fmt(r.base)}m → ${fmt(r.now)}m (${fmtSigned(r.pct)}%)`,
                     `GNI pc ${fmtUsd(r.gnipc)} · CPR ${r.cpr.toFixed(2)} · poverty ${fmt(r.pov * 100)}%`,
+                    ...(r.fcs ? [`FCS: ${FCS_LABELS[r.fcs].toLowerCase()}`] : []),
                     `Population ${fmt(r.pop)}m`
                   ];
                 }
@@ -459,7 +464,11 @@
       charts.corr = new Chart($('corr'), {
         type: 'bar',
         data: {
-          labels: before.map(m => m.label),
+          // Split labels over lines rather than letting Chart.js rotate them
+          labels: before.map(m => {
+            const parts = m.label.split(' + ');
+            return parts.length === 1 ? m.label.split(' ') : [parts[0], ...parts.slice(1).map(x => '+ ' + x)];
+          }),
           datasets: [
             { label: 'FY25 formula', data: [], backgroundColor: COLORS.tealGray, borderWidth: 0 },
             { label: 'Your settings', data: [], backgroundColor: COLORS.lightTeal, borderWidth: 0 }
@@ -469,7 +478,7 @@
           maintainAspectRatio: false,
           scales: {
             y: { grid: { color: ctx => ctx.tick.value === 0 ? COLORS.tealBlack : COLORS.lightGray }, border: { display: false } },
-            x: { grid: { display: false } }
+            x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: false } }
           },
           plugins: {
             legend: { display: true, position: 'top', align: 'start', labels: { boxWidth: 12, boxHeight: 12 } },
@@ -490,6 +499,66 @@
     }).join('');
   }
 
+  // ------------------------------------------------------------------ tab 1: FCS share
+
+  const FCS_LABELS = { conflict: 'Conflict', fragility: 'Institutional and social fragility' };
+  const FCS_GROUPS = [
+    { label: 'All FCS', chartLabel: 'All FCS', test: c => !!c.fcs },
+    { label: 'Conflict', chartLabel: 'Conflict', test: c => c.fcs === 'conflict' },
+    { label: 'Institutional and social fragility', chartLabel: ['Institutional and', 'social fragility'], test: c => c.fcs === 'fragility' }
+  ];
+
+  // Share of the total allocation (and SDR m) going to each FCS group
+  function fcsShares(results) {
+    const total = results.reduce((t, r) => t + r.alloc, 0);
+    return FCS_GROUPS.map(g => {
+      const amount = results.reduce((t, r, i) => t + (g.test(C[i]) ? r.alloc : 0), 0);
+      return { amount, share: amount / total * 100 };
+    });
+  }
+
+  function updateFcs() {
+    const before = fcsShares(baseline), after = fcsShares(current);
+
+    if (!charts.fcs) {
+      charts.fcs = new Chart($('fcs'), {
+        type: 'bar',
+        data: {
+          labels: FCS_GROUPS.map(g => g.chartLabel),
+          datasets: [
+            { label: 'FY25 formula', data: [], backgroundColor: COLORS.tealGray, borderWidth: 0 },
+            { label: 'Your settings', data: [], backgroundColor: COLORS.lightTeal, borderWidth: 0 }
+          ]
+        },
+        options: {
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => v + '%' },
+                 grid: { color: ctx => ctx.tick.value === 0 ? COLORS.tealBlack : COLORS.lightGray }, border: { display: false } },
+            x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: false } }
+          },
+          plugins: {
+            legend: { display: true, position: 'top', align: 'start', labels: { boxWidth: 12, boxHeight: 12 } },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmt(ctx.raw)}%` } }
+          }
+        }
+      });
+    }
+    const ch = charts.fcs;
+    ch.data.datasets[0].data = before.map(g => g.share);
+    ch.data.datasets[1].data = after.map(g => g.share);
+    ch.update();
+
+    $('fcs-table').querySelector('tbody').innerHTML = FCS_GROUPS.map((g, k) => {
+      const d = after[k].share - before[k].share;
+      const cls = Math.abs(d) < 0.05 ? 'muted' : d > 0 ? 'pos' : 'neg';
+      return `<tr><td>${g.label}</td>` +
+        `<td>${fmt(before[k].share)}% <span class="muted">(SDR ${fmt(before[k].amount, 0)}m)</span></td>` +
+        `<td>${fmt(after[k].share)}% <span class="muted">(SDR ${fmt(after[k].amount, 0)}m)</span></td>` +
+        `<td class="${cls}">${fmtSigned(d)}</td></tr>`;
+    }).join('');
+  }
+
   // ------------------------------------------------------------------ tab 1: table
 
   const COLS = [
@@ -497,6 +566,7 @@
     { key: 'gnipc', label: 'GNI pc (US$)', fmt: r => fmtUsd(r.gnipc) },
     { key: 'cpr', label: 'CPR', fmt: r => r.cpr.toFixed(2) },
     { key: 'pov', label: 'Poverty rate', fmt: r => fmt(r.pov * 100) + '%' },
+    { key: 'fcs', label: 'FCS', fmt: r => ({ conflict: 'Conflict', fragility: 'Fragility' })[r.fcs] || '' },
     { key: 'base', label: 'FY25 formula', fmt: r => fmt(r.base) },
     { key: 'now', label: 'Your settings', fmt: r => r.eligible ? fmt(r.now) : '0.0 (excluded)' },
     { key: 'abs', label: 'Change', fmt: r => fmtSigned(r.abs), cls: r => r.abs > 0.05 ? 'pos' : r.abs < -0.05 ? 'neg' : 'muted' },
@@ -517,7 +587,7 @@
   function updateTable(R = rows()) {
     const { key, dir } = state.sort;
     const s = dir === 'asc' ? 1 : -1;
-    R.sort((a, b) => key === 'country' ? s * a.country.localeCompare(b.country) : s * (a[key] - b[key]));
+    R.sort((a, b) => typeof a[key] === 'string' ? s * a[key].localeCompare(b[key]) : s * (a[key] - b[key]));
     $('country-table').querySelectorAll('th').forEach(th => {
       if (th.dataset.key === key) th.setAttribute('aria-sort', dir === 'asc' ? 'ascending' : 'descending');
       else th.removeAttribute('aria-sort');
@@ -538,7 +608,7 @@
   function downloadCsv() {
     const p = params();
     const header = ['country', 'iso3', 'gni_per_capita_usd', 'cpr', 'poverty_rate_' + state.povLine, 'fy25_formula_sdr_m',
-      'your_settings_sdr_m', 'change_sdr_m', 'change_pct', 'excluded_by_cutoff'];
+      'your_settings_sdr_m', 'change_sdr_m', 'change_pct', 'excluded_by_cutoff', 'fcs_' + DATA.meta.fcs_year.toLowerCase()];
     const lines = [
       `# IDA PBA explorer. Settings: GNI exponent ${p.expGni}; CPR exponent ${p.expCpr}; base SDR ${p.base}m; GNI cutoff ${p.cutoff == null ? 'none' : p.cutoff}`,
       header.join(',')
@@ -546,7 +616,7 @@
     rows().forEach(r => {
       const c = C[r.i];
       lines.push([`"${c.country}"`, c.iso3, c.gnipc, c.cpr.toFixed(4), r.pov, r.base.toFixed(2), r.now.toFixed(2),
-        r.abs.toFixed(2), r.pct.toFixed(2), !r.eligible].join(','));
+        r.abs.toFixed(2), r.pct.toFixed(2), !r.eligible, r.fcs].join(','));
     });
     const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
     const a = document.createElement('a');
